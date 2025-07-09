@@ -103,11 +103,21 @@ function renderTextNote(note) {
     const noteDiv = document.createElement('div');
     noteDiv.className = 'note-container';
     noteDiv.innerHTML = `
+        <div class="note-header">
+            <input type="text" class="note-title" data-id="${note.id}" value="${note.title}" placeholder="Note Title">
+            <button class="btn-delete-item" data-id="${note.id}">✕</button>
+        </div>
         <textarea class="note-textarea" data-id="${note.id}" placeholder="Start typing your note...">${note.content}</textarea>
-        <button class="btn-delete-item" data-id="${note.id}">✕</button>
     `;
     contentArea.appendChild(noteDiv);
     
+    // Event listeners
+    const titleInput = noteDiv.querySelector('.note-title');
+    titleInput.addEventListener('input', () => {
+        note.title = titleInput.value;
+        scheduleSave();
+    });
+
     const textarea = noteDiv.querySelector('textarea');
     textarea.addEventListener('input', () => {
         note.content = textarea.value;
@@ -190,7 +200,7 @@ function addContent(type) {
     let newItem;
     
     if (type === 'note') {
-        newItem = { id, type: 'note', content: '' };
+        newItem = { id, type: 'note', title: 'New Note', content: '' };
     } else if (type === 'checklist') {
         newItem = { 
             id, 

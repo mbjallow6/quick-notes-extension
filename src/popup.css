@@ -96,6 +96,27 @@ body {
 }
 
 /* --- Note Specific --- */
+.note-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.note-title {
+    flex: 1;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 4px;
+    border-radius: 4px;
+    background: transparent;
+}
+.note-title:focus {
+    background: #f1f3f5;
+    outline: none;
+}
+
+
 .note-container {
     background: var(--container-bg);
     border-radius: 8px;
@@ -103,7 +124,7 @@ body {
     padding: 8px;
     border: 1px solid var(--border-color);
     display: flex;
-    align-items: flex-start;
+    flex-direction: column; /* This stacks the items vertically */
 }
 
 .note-textarea {
