@@ -146,6 +146,7 @@ function renderChecklist(checklist) {
             <input type="text" class="checklist-title" data-id="${checklist.id}" value="${checklist.title}" placeholder="Checklist Title">
             <button class="btn-delete-item" data-id="${checklist.id}">✕</button>
         </div>
+        <textarea class="checklist-description" data-id="${checklist.id}" placeholder="Add a description...">${checklist.description}</textarea>
         <div class="checklist-items">${itemsHtml}</div>
         <button class="btn-add-checklist-item" data-id="${checklist.id}">+ Add item</button>
     `;
@@ -155,6 +156,11 @@ function renderChecklist(checklist) {
     // Event listeners
     checklistDiv.querySelector('.checklist-title').addEventListener('input', (e) => {
         checklist.title = e.target.value;
+        scheduleSave();
+    });
+    
+    checklistDiv.querySelector('.checklist-description').addEventListener('input', (e) => {
+        checklist.description = e.target.value;
         scheduleSave();
     });
 
@@ -205,7 +211,8 @@ function addContent(type) {
         newItem = { 
             id, 
             type: 'checklist', 
-            title: 'My Checklist', 
+            title: 'My Checklist',
+            description: '',
             items: [{ id: `item-${Date.now()}`, text: '', done: false }]
         };
     }
