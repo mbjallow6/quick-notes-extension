@@ -1,172 +1,237 @@
-// Configuration
-const STORAGE_KEY = 'quickNotes';
-const AUTO_SAVE_DELAY = 1000; // 1 second
+// --- CONFIGURATION ---
+const STORAGE_KEY = 'quickNotesData';
+const DEBOUNCE_DELAY = 500; // ms
 
-// DOM elements
-let notepad;
-let statusElement;
-let charCountElement;
+// --- DOM ELEMENTS ---
+let contentArea, addNoteBtn, addChecklistBtn, statusElement, clearBtn;
 
-// State management
-let autoSaveTimer;
-let isInitialized = false;
+// --- STATE ---
+let state = {};
+let saveTimeout;
 
-// Initialize extension
-document.addEventListener('DOMContentLoaded', initializeExtension);
+// --- INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', main);
 
-async function initializeExtension() {
+function main() {
+    // Assign DOM elements
+    contentArea = document.getElementById('contentArea');
+    addNoteBtn = document.getElementById('addNoteBtn');
+    addChecklistBtn = document.getElementById('addChecklistBtn');
+    statusElement = document.querySelector('.status');
+    clearBtn = document.getElementById('clearBtn');
+
+    // Attach event listeners
+    addNoteBtn.addEventListener('click', () => addContent('note'));
+    addChecklistBtn.addEventListener('click', () => addContent('checklist'));
+    clearBtn.addEventListener('click', clearAllData);
+    
+    // Load initial data
+    loadData();
+}
+
+// --- DATA MANAGEMENT ---
+
+async function loadData() {
     try {
-        // Get DOM elements
-        notepad = document.getElementById('notepad');
-        statusElement = document.querySelector('.status');
-        
-        // Load saved notes
-        await loadNotes();
-        
-        // Set up event listeners
-        setupEventListeners();
-        
-        // Focus on textarea
-        notepad.focus();
-        notepad.setSelectionRange(notepad.value.length, notepad.value.length);
-        
-        isInitialized = true;
+        const result = await chrome.storage.local.get(STORAGE_KEY);
+        state = result[STORAGE_KEY] || getInitialState();
+        render();
         updateStatus('Ready');
-        
     } catch (error) {
-        console.error('Initialization error:', error);
-        updateStatus('Error loading notes');
+        console.error('Error loading data:', error);
+        updateStatus('Error loading data');
     }
 }
 
-function setupEventListeners() {
-    // Auto-save on input with debouncing
-    notepad.addEventListener('input', handleInput);
-    
-    // Save on window close
-    window.addEventListener('beforeunload', saveNotes);
-    
-    // Keyboard shortcuts
-    notepad.addEventListener('keydown', handleKeyDown);
+function getInitialState() {
+    return {
+        content: []
+    };
 }
 
-function handleInput() {
-    if (!isInitialized) return;
-    
-    // Clear existing timer
-    if (autoSaveTimer) {
-        clearTimeout(autoSaveTimer);
-    }
-    
-    // Show typing status
+function scheduleSave() {
+    clearTimeout(saveTimeout);
     updateStatus('Typing...');
-    
-    // Set new auto-save timer
-    autoSaveTimer = setTimeout(() => {
-        saveNotes();
-    }, AUTO_SAVE_DELAY);
+    saveTimeout = setTimeout(saveData, DEBOUNCE_DELAY);
 }
 
-function handleKeyDown(event) {
-    // Ctrl+S to save
-    if (event.ctrlKey && event.key === 's') {
-        event.preventDefault();
-        saveNotes();
+async function saveData() {
+    try {
+        await chrome.storage.local.set({ [STORAGE_KEY]: state });
         updateStatus('Saved!');
-    }
-}
-
-async function loadNotes() {
-    try {
-        const result = await chrome.storage.local.get([STORAGE_KEY]);
-        const savedNotes = result[STORAGE_KEY] || '';
-        notepad.value = savedNotes;
+        setTimeout(() => updateStatus('Ready'), 1500);
     } catch (error) {
-        console.error('Error loading notes:', error);
-        throw error;
-    }
-}
-
-async function saveNotes() {
-    try {
-        const notes = notepad.value;
-        await chrome.storage.local.set({
-            [STORAGE_KEY]: notes
-        });
-        
-        updateStatus('Saved');
-        
-        // Reset status after delay
-        setTimeout(() => {
-            if (isInitialized) {
-                updateStatus('Ready');
-            }
-        }, 1500);
-        
-    } catch (error) {
-        console.error('Error saving notes:', error);
+        console.error('Error saving data:', error);
         updateStatus('Save failed');
     }
 }
 
+async function clearAllData() {
+    if (confirm('Are you sure you want to delete everything? This cannot be undone.')) {
+        state = getInitialState();
+        await saveData();
+        render();
+        updateStatus('All cleared');
+    }
+}
+
+// --- RENDERING ---
+
+function render() {
+    contentArea.innerHTML = ''; // Clear previous content
+    if (state.content.length === 0) {
+        renderWelcomeMessage();
+    } else {
+        state.content.forEach(item => {
+            if (item.type === 'note') {
+                renderTextNote(item);
+            } else if (item.type === 'checklist') {
+                renderChecklist(item);
+            }
+        });
+    }
+}
+
+function renderWelcomeMessage() {
+    const welcomeDiv = document.createElement('div');
+    welcomeDiv.className = 'welcome-message';
+    welcomeDiv.innerHTML = `<p>It's a bit empty here. <br> Add a note or a checklist to get started!</p>`;
+    contentArea.appendChild(welcomeDiv);
+}
+
+function renderTextNote(note) {
+    const noteDiv = document.createElement('div');
+    noteDiv.className = 'note-container';
+    noteDiv.innerHTML = `
+        <textarea class="note-textarea" data-id="${note.id}" placeholder="Start typing your note...">${note.content}</textarea>
+        <button class="btn-delete-item" data-id="${note.id}">✕</button>
+    `;
+    contentArea.appendChild(noteDiv);
+    
+    const textarea = noteDiv.querySelector('textarea');
+    textarea.addEventListener('input', () => {
+        note.content = textarea.value;
+        scheduleSave();
+    });
+    
+    noteDiv.querySelector('.btn-delete-item').addEventListener('click', () => {
+        deleteContent(note.id);
+    });
+}
+
+function renderChecklist(checklist) {
+    const checklistDiv = document.createElement('div');
+    checklistDiv.className = 'checklist-container';
+    
+    const itemsHtml = checklist.items.map(item => `
+        <div class="checklist-item ${item.done ? 'done' : ''}">
+            <input type="checkbox" data-id="${checklist.id}" data-item-id="${item.id}" ${item.done ? 'checked' : ''}>
+            <input type="text" class="checklist-item-text" data-id="${checklist.id}" data-item-id="${item.id}" value="${item.text}" placeholder="New item...">
+            <button class="btn-delete-checklist-item" data-id="${checklist.id}" data-item-id="${item.id}">-</button>
+        </div>
+    `).join('');
+    
+    checklistDiv.innerHTML = `
+        <div class="checklist-header">
+            <input type="text" class="checklist-title" data-id="${checklist.id}" value="${checklist.title}" placeholder="Checklist Title">
+            <button class="btn-delete-item" data-id="${checklist.id}">✕</button>
+        </div>
+        <div class="checklist-items">${itemsHtml}</div>
+        <button class="btn-add-checklist-item" data-id="${checklist.id}">+ Add item</button>
+    `;
+    
+    contentArea.appendChild(checklistDiv);
+
+    // Event listeners
+    checklistDiv.querySelector('.checklist-title').addEventListener('input', (e) => {
+        checklist.title = e.target.value;
+        scheduleSave();
+    });
+
+    checklistDiv.querySelector('.btn-add-checklist-item').addEventListener('click', () => {
+        addChecklistItem(checklist.id);
+    });
+    
+    checklistDiv.querySelector('.btn-delete-item').addEventListener('click', () => {
+        deleteContent(checklist.id);
+    });
+
+    checklistDiv.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+            const itemId = e.target.dataset.itemId;
+            const item = checklist.items.find(i => i.id === itemId);
+            item.done = e.target.checked;
+            scheduleSave();
+            render(); // Re-render to apply "done" class
+        });
+    });
+
+    checklistDiv.querySelectorAll('.checklist-item-text').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const itemId = e.target.dataset.itemId;
+            const item = checklist.items.find(i => i.id === itemId);
+            item.text = e.target.value;
+            scheduleSave();
+        });
+    });
+    
+    checklistDiv.querySelectorAll('.btn-delete-checklist-item').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const itemId = e.target.dataset.itemId;
+            deleteChecklistItem(checklist.id, itemId);
+        });
+    });
+}
+
+// --- CONTENT MANIPULATION ---
+
+function addContent(type) {
+    const id = `id-${Date.now()}`;
+    let newItem;
+    
+    if (type === 'note') {
+        newItem = { id, type: 'note', content: '' };
+    } else if (type === 'checklist') {
+        newItem = { 
+            id, 
+            type: 'checklist', 
+            title: 'My Checklist', 
+            items: [{ id: `item-${Date.now()}`, text: '', done: false }]
+        };
+    }
+    
+    state.content.push(newItem);
+    scheduleSave();
+    render();
+}
+
+function deleteContent(id) {
+    state.content = state.content.filter(item => item.id !== id);
+    scheduleSave();
+    render();
+}
+
+function addChecklistItem(checklistId) {
+    const checklist = state.content.find(c => c.id === checklistId);
+    if (checklist) {
+        const newItem = { id: `item-${Date.now()}`, text: '', done: false };
+        checklist.items.push(newItem);
+        scheduleSave();
+        render();
+    }
+}
+
+function deleteChecklistItem(checklistId, itemId) {
+    const checklist = state.content.find(c => c.id === checklistId);
+    if (checklist) {
+        checklist.items = checklist.items.filter(item => item.id !== itemId);
+        scheduleSave();
+        render();
+    }
+}
+
 function updateStatus(message) {
-    statusElement.textContent = message;
-}
-
-function updateCharCount() {
-    const charCountElement = document.getElementById('charCount');
-    if (charCountElement) {
-        const count = notepad.value.length;
-        charCountElement.textContent = count.toLocaleString();
-    }
-}
-
-// Update the handleInput function to include character counting
-function handleInput() {
-    if (!isInitialized) return;
-    
-    // Update character count
-    updateCharCount();
-    
-    // Clear existing timer
-    if (autoSaveTimer) {
-        clearTimeout(autoSaveTimer);
-    }
-    
-    // Show typing status
-    updateStatus('Typing...');
-    
-    // Set new auto-save timer
-    autoSaveTimer = setTimeout(() => {
-        saveNotes();
-    }, AUTO_SAVE_DELAY);
-}
-
-// Update initializeExtension to include initial character count
-async function initializeExtension() {
-    try {
-        // Get DOM elements
-        notepad = document.getElementById('notepad');
-        statusElement = document.querySelector('.status');
-        
-        // Load saved notes
-        await loadNotes();
-        
-        // Set up event listeners
-        setupEventListeners();
-        
-        // Update character count
-        updateCharCount();
-        
-        // Focus on textarea
-        notepad.focus();
-        notepad.setSelectionRange(notepad.value.length, notepad.value.length);
-        
-        isInitialized = true;
-        updateStatus('Ready');
-        
-    } catch (error) {
-        console.error('Initialization error:', error);
-        updateStatus('Error loading notes');
+    if (statusElement) {
+        statusElement.textContent = message;
     }
 }

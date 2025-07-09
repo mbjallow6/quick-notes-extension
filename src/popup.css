@@ -1,3 +1,14 @@
+/* --- Base Styles --- */
+:root {
+    --primary-color: #4f46e5;
+    --background-color: #f8f9fa;
+    --container-bg: #fff;
+    --text-color: #212529;
+    --muted-color: #6c757d;
+    --border-color: #dee2e6;
+    --hover-bg: #f1f3f5;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -6,11 +17,16 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    width: 350px;
-    height: 400px;
-    background: #f8f9fa;
+    width: 380px;
+    min-height: 450px;
+    max-height: 600px; /* Allow vertical resizing */
+    background: var(--background-color);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
 }
 
+/* --- Layout --- */
 .container {
     display: flex;
     flex-direction: column;
@@ -21,40 +37,20 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
-    background: #fff;
-    border-bottom: 1px solid #e9ecef;
+    padding: 10px 16px;
+    background: var(--container-bg);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .header h1 {
     font-size: 16px;
-    color: #495057;
+    font-weight: 600;
 }
 
-.version {
-    font-size: 12px;
-    color: #6c757d;
-}
-
-.editor {
+.content-area {
     flex: 1;
-    padding: 16px;
-}
-
-#notepad {
-    width: 100%;
-    height: 100%;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
-    padding: 12px;
-    font-family: 'Monaco', 'Menlo', monospace;
-    font-size: 13px;
-    resize: none;
-    outline: none;
-}
-
-#notepad:focus {
-    border-color: #4f46e5;
+    overflow-y: auto; /* Allow scrolling */
+    padding: 8px;
 }
 
 .footer {
@@ -62,12 +58,147 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 8px 16px;
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
+    background: var(--container-bg);
+    border-top: 1px solid var(--border-color);
     font-size: 12px;
-    color: #6c757d;
 }
 
-.char-count {
-    font-variant-numeric: tabular-nums;
+/* --- Controls & Buttons --- */
+.btn-clear, .btn-delete-item, .btn-delete-checklist-item {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--muted-color);
+    padding: 4px;
+}
+.btn-clear:hover, .btn-delete-item:hover, .btn-delete-checklist-item:hover {
+    color: #d9480f;
+}
+
+.btn-add {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-left: 8px;
+}
+.btn-add:hover {
+    background-color: #3e38b5;
+}
+
+.status {
+    color: var(--muted-color);
+}
+
+/* --- Note Specific --- */
+.note-container {
+    background: var(--container-bg);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: flex-start;
+}
+
+.note-textarea {
+    flex: 1;
+    border: none;
+    padding: 8px;
+    font-family: 'Menlo', 'Monaco', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+    min-height: 60px;
+    background: transparent;
+}
+
+/* --- Checklist Specific --- */
+.checklist-container {
+    background: var(--container-bg);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border-color);
+    padding: 12px;
+}
+
+.checklist-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.checklist-title {
+    flex: 1;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 4px;
+    border-radius: 4px;
+    background: transparent;
+}
+.checklist-title:focus {
+    background: #f1f3f5;
+    outline: none;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+}
+.checklist-item.done .checklist-item-text {
+    text-decoration: line-through;
+    color: var(--muted-color);
+}
+
+.checklist-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin-right: 12px;
+}
+
+.checklist-item-text {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 4px;
+    border-radius: 4px;
+}
+.checklist-item-text:focus {
+    background: #f1f3f5;
+    outline: none;
+}
+.btn-delete-checklist-item {
+    font-size: 16px;
+    margin-left: 8px;
+}
+
+.btn-add-checklist-item {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px;
+    margin-top: 8px;
+}
+.btn-add-checklist-item:hover {
+    text-decoration: underline;
+}
+
+/* --- Welcome Message --- */
+.welcome-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted-color);
+}
+.welcome-message p {
+    line-height: 1.6;
 }
