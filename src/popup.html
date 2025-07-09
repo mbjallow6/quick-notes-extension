@@ -12,22 +12,20 @@
             <h1>Quick Notes</h1>
             <div class="controls">
                 <button id="clearBtn" class="btn-clear" title="Clear all notes">🗑️</button>
-                <div class="version">v1.0.0</div>
+                <div class="version">v1.1.0</div>
             </div>
         </header>
         
-        <main class="editor">
-            <textarea 
-                id="notepad" 
-                placeholder="Start typing your notes here...">
-            </textarea>
+        <main id="contentArea" class="content-area">
+            <!-- Notes and checklists will be dynamically rendered here -->
         </main>
         
         <footer class="footer">
-            <div class="status">Ready</div>
-            <div class="char-count">
-                <span id="charCount">0</span> characters
+            <div class="add-controls">
+                <button id="addNoteBtn" class="btn-add">+ Note</button>
+                <button id="addChecklistBtn" class="btn-add">+ Checklist</button>
             </div>
+            <div class="status">Ready</div>
         </footer>
     </div>
     
