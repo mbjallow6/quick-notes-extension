@@ -17,10 +17,18 @@ This document outlines the development plan for the Quick Notes Chrome Extension
 
 This backlog is organized by **Epics**. Each Epic represents a major area of functionality that delivers significant value to the user.
 
-### **Epic 1: Core Productivity Boosters**
-- [x] Implement To-Do Checklists with Tracking
-- [ ] Add Color-Coding for Notes & Checklists
-- [ ] Implement Markdown & Code Syntax Highlighting
+### **Epic 1: Rich & Interactive Content**
+- [ ] **Implement Rich Notes & Checklists**
+    - [x] Basic text note creation
+    - [x] Basic checklist creation (add/check/delete items)
+    - [x] Add titles to checklists
+    - [ ] Add titles to text notes
+    - [ ] Add an optional description area to checklists
+    - [ ] Make notes and checklists collapsible
+    - [ ] Display a visual progress tracker for checklists (e.g., progress bar)
+    - [ ] Allow reordering of notes/checklists via drag-and-drop
+- [ ] **Add Color-Coding for Notes & Checklists**
+- [ ] **Implement Markdown & Code Syntax Highlighting**
 
 ### **Epic 2: Advanced Organization & Workflow**
 - [ ] Develop a Flexible Tagging System
