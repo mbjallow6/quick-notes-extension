@@ -95,6 +95,18 @@ body {
     color: var(--muted-color);
 }
 
+/* --- Note & Checklist Shared Styles --- */
+.collapse-icon {
+    padding-right: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    user-select: none; /* Prevents text selection on click */
+}
+
+.note-header, .checklist-header {
+    cursor: pointer;
+}
+
 /* --- Note Specific --- */
 .note-header {
     display: flex;
@@ -116,21 +128,20 @@ body {
     outline: none;
 }
 
-
 .note-container {
     background: var(--container-bg);
     border-radius: 8px;
     margin-bottom: 12px;
-    padding: 8px;
+    padding: 12px;
     border: 1px solid var(--border-color);
     display: flex;
-    flex-direction: column; /* This stacks the items vertically */
+    flex-direction: column;
 }
 
 .note-textarea {
     flex: 1;
     border: none;
-    padding: 8px;
+    padding: 8px 4px;
     font-family: 'Menlo', 'Monaco', monospace;
     font-size: 13px;
     line-height: 1.5;
@@ -138,6 +149,10 @@ body {
     outline: none;
     min-height: 60px;
     background: transparent;
+}
+
+.note-container.collapsed .note-textarea {
+    display: none;
 }
 
 /* --- Checklist Specific --- */
@@ -226,6 +241,12 @@ body {
 }
 .btn-add-checklist-item:hover {
     text-decoration: underline;
+}
+
+.checklist-container.collapsed .checklist-description,
+.checklist-container.collapsed .checklist-items,
+.checklist-container.collapsed .btn-add-checklist-item {
+    display: none;
 }
 
 /* --- Welcome Message --- */
