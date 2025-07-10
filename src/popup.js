@@ -101,9 +101,10 @@ function renderWelcomeMessage() {
 
 function renderTextNote(note) {
     const noteDiv = document.createElement('div');
-    noteDiv.className = 'note-container';
+    noteDiv.className = `note-container ${note.isCollapsed ? 'collapsed' : ''}`;
     noteDiv.innerHTML = `
-        <div class="note-header">
+        <div class="note-header" data-id="${note.id}">
+            <span class="collapse-icon">${note.isCollapsed ? '▶' : '▼'}</span>
             <input type="text" class="note-title" data-id="${note.id}" value="${note.title}" placeholder="Note Title">
             <button class="btn-delete-item" data-id="${note.id}">✕</button>
         </div>
@@ -112,6 +113,16 @@ function renderTextNote(note) {
     contentArea.appendChild(noteDiv);
     
     // Event listeners
+    noteDiv.querySelector('.note-header').addEventListener('click', (e) => {
+        // Prevent toggling when interacting with input or button
+        if (e.target.matches('input') || e.target.matches('button')) {
+            return;
+        }
+        note.isCollapsed = !note.isCollapsed;
+        scheduleSave();
+        render();
+    });
+
     const titleInput = noteDiv.querySelector('.note-title');
     titleInput.addEventListener('input', () => {
         note.title = titleInput.value;
@@ -131,7 +142,7 @@ function renderTextNote(note) {
 
 function renderChecklist(checklist) {
     const checklistDiv = document.createElement('div');
-    checklistDiv.className = 'checklist-container';
+    checklistDiv.className = `checklist-container ${checklist.isCollapsed ? 'collapsed' : ''}`;
     
     const itemsHtml = checklist.items.map(item => `
         <div class="checklist-item ${item.done ? 'done' : ''}">
@@ -142,7 +153,8 @@ function renderChecklist(checklist) {
     `).join('');
     
     checklistDiv.innerHTML = `
-        <div class="checklist-header">
+        <div class="checklist-header" data-id="${checklist.id}">
+            <span class="collapse-icon">${checklist.isCollapsed ? '▶' : '▼'}</span>
             <input type="text" class="checklist-title" data-id="${checklist.id}" value="${checklist.title}" placeholder="Checklist Title">
             <button class="btn-delete-item" data-id="${checklist.id}">✕</button>
         </div>
@@ -154,6 +166,15 @@ function renderChecklist(checklist) {
     contentArea.appendChild(checklistDiv);
 
     // Event listeners
+    checklistDiv.querySelector('.checklist-header').addEventListener('click', (e) => {
+        if (e.target.matches('input') || e.target.matches('button')) {
+            return;
+        }
+        checklist.isCollapsed = !checklist.isCollapsed;
+        scheduleSave();
+        render();
+    });
+
     checklistDiv.querySelector('.checklist-title').addEventListener('input', (e) => {
         checklist.title = e.target.value;
         scheduleSave();
@@ -206,13 +227,14 @@ function addContent(type) {
     let newItem;
     
     if (type === 'note') {
-        newItem = { id, type: 'note', title: 'New Note', content: '' };
+        newItem = { id, type: 'note', title: 'New Note', content: '', isCollapsed: false };
     } else if (type === 'checklist') {
-        newItem = { 
-            id, 
-            type: 'checklist', 
+        newItem = {
+            id,
+            type: 'checklist',
             title: 'My Checklist',
             description: '',
+            isCollapsed: false,
             items: [{ id: `item-${Date.now()}`, text: '', done: false }]
         };
     }
