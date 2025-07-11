@@ -81,3 +81,28 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.
+```
+quick-notes-extension
+├─ CONTRIBUTING.md
+├─ LICENSE
+├─ PROJECT_PLAN.md
+├─ README.md
+├─ build.sh
+├─ docs
+│  └─ development.md
+├─ release.sh
+├─ src
+│  ├─ icons
+│  │  ├─ icon128.png
+│  │  ├─ icon16.png
+│  │  └─ icon48.png
+│  ├─ manifest.json
+│  ├─ popup.css
+│  ├─ popup.html
+│  ├─ popup.js
+│  ├─ temp.js
+│  └─ tests
+│     └─ test.js
+└─ test-extension.sh
+
+```
