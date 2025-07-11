@@ -26,7 +26,7 @@ This backlog is organized by **Epics**. Each Epic represents a major area of fun
     - [x] Add an optional description area to checklists
     - [x] Make notes and checklists collapsible
     - [x] Display a visual progress tracker for checklists (e.g., progress bar)
-    - [ ] Allow reordering of notes/checklists via drag-and-drop
+    - [x] Allow reordering of notes/checklists via drag-and-drop
 - [ ] **Add Color-Coding for Notes & Checklists**
 - [ ] **Implement Markdown & Code Syntax Highlighting**
 
