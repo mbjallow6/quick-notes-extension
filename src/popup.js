@@ -358,7 +358,7 @@ function handleDragEnd(e) {
 }
 
 function handleDragOver(e) {
-    e.preventDefault(); // This is crucial for drop to work
+    e.preventDefault(); 
     e.dataTransfer.dropEffect = 'move';
 }
 
