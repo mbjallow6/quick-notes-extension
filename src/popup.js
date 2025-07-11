@@ -144,6 +144,9 @@ function renderChecklist(checklist) {
     const checklistDiv = document.createElement('div');
     checklistDiv.className = `checklist-container ${checklist.isCollapsed ? 'collapsed' : ''}`;
     
+    // Calculate progress for this checklist
+    const progress = calculateChecklistProgress(checklist.id);
+    
     const itemsHtml = checklist.items.map(item => `
         <div class="checklist-item ${item.done ? 'done' : ''}">
             <input type="checkbox" data-id="${checklist.id}" data-item-id="${item.id}" ${item.done ? 'checked' : ''}>
@@ -158,6 +161,14 @@ function renderChecklist(checklist) {
             <input type="text" class="checklist-title" data-id="${checklist.id}" value="${checklist.title}" placeholder="Checklist Title">
             <button class="btn-delete-item" data-id="${checklist.id}">✕</button>
         </div>
+        
+        <div class="checklist-progress">
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: ${progress.percentage}%"></div>
+            </div>
+            <span class="progress-text">${progress.completed}/${progress.total}</span>
+        </div>
+        
         <textarea class="checklist-description" data-id="${checklist.id}" placeholder="Add a description...">${checklist.description}</textarea>
         <div class="checklist-items">${itemsHtml}</div>
         <button class="btn-add-checklist-item" data-id="${checklist.id}">+ Add item</button>
@@ -165,7 +176,7 @@ function renderChecklist(checklist) {
     
     contentArea.appendChild(checklistDiv);
 
-    // Event listeners
+    // ALL YOUR EXISTING EVENT LISTENERS (unchanged)
     checklistDiv.querySelector('.checklist-header').addEventListener('click', (e) => {
         if (e.target.matches('input') || e.target.matches('button')) {
             return;
@@ -199,7 +210,7 @@ function renderChecklist(checklist) {
             const item = checklist.items.find(i => i.id === itemId);
             item.done = e.target.checked;
             scheduleSave();
-            render(); // Re-render to apply "done" class
+            render(); // This will update the progress bar automatically
         });
     });
 
@@ -219,6 +230,7 @@ function renderChecklist(checklist) {
         });
     });
 }
+
 
 // --- CONTENT MANIPULATION ---
 
@@ -272,5 +284,38 @@ function deleteChecklistItem(checklistId, itemId) {
 function updateStatus(message) {
     if (statusElement) {
         statusElement.textContent = message;
+    }
+}
+
+
+// --- PROGRESS BAR FUNCTIONS ---
+function calculateChecklistProgress(checklistId) {
+    const checklist = state.content.find(item => item.id === checklistId);
+    if (!checklist || !checklist.items || checklist.items.length === 0) {
+        return { percentage: 0, completed: 0, total: 0 };
+    }
+    
+    const total = checklist.items.length;
+    const completed = checklist.items.filter(item => item.done).length;
+    const percentage = Math.round((completed / total) * 100);
+    
+    return { percentage, completed, total };
+}
+
+function updateProgressBar(checklistId) {
+    const progress = calculateChecklistProgress(checklistId);
+    const progressFill = document.querySelector(`[data-checklist-id="${checklistId}"] .progress-bar-fill`);
+    const progressText = document.querySelector(`[data-checklist-id="${checklistId}"] .progress-text`);
+    
+    if (progressFill && progressText) {
+        progressFill.style.width = `${progress.percentage}%`;
+        progressText.textContent = `${progress.completed}/${progress.total}`;
+        
+        // Optional: Change color when complete
+        if (progress.percentage === 100) {
+            progressFill.style.backgroundColor = '#22c55e'; // Green for completion
+        } else {
+            progressFill.style.backgroundColor = 'var(--primary-color)';
+        }
     }
 }
