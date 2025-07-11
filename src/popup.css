@@ -294,3 +294,49 @@ body {
 .checklist-container.collapsed .checklist-progress {
   display: none;
 }
+
+/* --- Drag and Drop Styles --- */
+.note-container, .checklist-container {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: move;
+}
+
+.note-container:hover, .checklist-container:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.drag-over {
+    border-top: 3px solid var(--primary-color) !important;
+    margin-top: 8px;
+}
+
+.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Drag handle indicator */
+.drag-handle {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted-color);
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    cursor: move;
+}
+
+.note-container:hover .drag-handle,
+.checklist-container:hover .drag-handle {
+    opacity: 1;
+}
+
+.note-header, .checklist-header {
+    position: relative;
+    padding-left: 24px;
+}
