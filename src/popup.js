@@ -2,6 +2,44 @@
 const STORAGE_KEY = 'quickNotesData';
 const DEBOUNCE_DELAY = 500; // ms
 
+const HIGHLIGHT_COLORS = [
+    { name: 'red', var: '--highlight-red', textVar: '--text-red' },
+    { name: 'blue', var: '--highlight-blue', textVar: '--text-blue' },
+    { name: 'green', var: '--highlight-green', textVar: '--text-green' },
+    { name: 'yellow', var: '--highlight-yellow', textVar: '--text-yellow' },
+    { name: 'purple', var: '--highlight-purple', textVar: '--text-purple' },
+    { name: 'gray', var: '--highlight-gray', textVar: '--text-gray' },
+    { name: 'none', var: 'transparent', textVar: '--text-color' } // Option to remove color
+];
+
+function createColorPalette(contentId, currentSelectedColor) {
+    const paletteDiv = document.createElement('div');
+    paletteDiv.className = 'color-palette';
+    paletteDiv.dataset.contentId = contentId; // To link palette to specific note/checklist
+
+    HIGHLIGHT_COLORS.forEach(color => {
+        const colorSwatch = document.createElement('button');
+        colorSwatch.className = 'color-swatch';
+        colorSwatch.style.backgroundColor = `var(${color.var})`;
+        colorSwatch.dataset.colorName = color.name;
+        colorSwatch.title = color.name.charAt(0).toUpperCase() + color.name.slice(1);
+
+        if (currentSelectedColor === color.name) {
+            colorSwatch.classList.add('selected');
+        }
+
+        colorSwatch.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent header collapse when clicking swatch
+            applyColorToContent(contentId, color.name);
+            // Hide the palette after selection
+            paletteDiv.remove();
+        });
+        paletteDiv.appendChild(colorSwatch);
+    });
+
+    return paletteDiv;
+}
+
 // --- DOM ELEMENTS ---
 let contentArea, addNoteBtn, addChecklistBtn, statusElement, clearBtn;
 
@@ -110,7 +148,7 @@ function renderWelcomeMessage() {
 
 function renderTextNote(note) {
     const noteDiv = document.createElement('div');
-    noteDiv.className = `note-container ${note.isCollapsed ? 'collapsed' : ''}`;
+    noteDiv.className = `note-container ${note.isCollapsed ? 'collapsed' : ''} ${note.color ? 'color-' + note.color : ''}`;
     noteDiv.draggable = true; 
     noteDiv.dataset.id = note.id; // Add ID for easier lookup
     
@@ -119,13 +157,14 @@ function renderTextNote(note) {
             <span class="drag-handle">⋮⋮</span>
             <span class="collapse-icon">${note.isCollapsed ? '▶' : '▼'}</span>
             <input type="text" class="note-title" value="${note.title}" placeholder="Note Title">
+            <button class="btn-color-picker" title="Pick a color">🎨</button>
             <button class="btn-delete-item">✕</button>
         </div>
         <textarea class="note-textarea" placeholder="Start typing your note...">${note.content}</textarea>
     `;
     
     noteDiv.querySelector('.note-header').addEventListener('click', (e) => {
-        if (e.target.matches('input') || e.target.matches('button')) return;
+        if (e.target.matches('input') || e.target.matches('button') || e.target.closest('.color-palette')) return;
         
         const contentItem = state.content.find(item => item.id === note.id);
         contentItem.isCollapsed = !contentItem.isCollapsed;
@@ -150,12 +189,24 @@ function renderTextNote(note) {
         deleteContent(note.id);
     });
 
+    const colorPickerBtn = noteDiv.querySelector('.btn-color-picker');
+    colorPickerBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent header collapse
+        const existingPalette = noteDiv.querySelector('.color-palette');
+        if (existingPalette) {
+            existingPalette.remove();
+        } else {
+            const palette = createColorPalette(note.id, note.color);
+            colorPickerBtn.after(palette);
+        }
+    });
+
     return noteDiv; // --- KEY CHANGE --- Return the element
 }
 
 function renderChecklist(checklist) {
     const checklistDiv = document.createElement('div');
-    checklistDiv.className = `checklist-container ${checklist.isCollapsed ? 'collapsed' : ''}`;
+    checklistDiv.className = `checklist-container ${checklist.isCollapsed ? 'collapsed' : ''} ${checklist.color ? 'color-' + checklist.color : ''}`;
     checklistDiv.draggable = true;
     checklistDiv.dataset.id = checklist.id; // Add ID for easier lookup
     
@@ -174,6 +225,7 @@ function renderChecklist(checklist) {
             <span class="drag-handle">⋮⋮</span>
             <span class="collapse-icon">${checklist.isCollapsed ? '▶' : '▼'}</span>
             <input type="text" class="checklist-title" value="${checklist.title}" placeholder="Checklist Title">
+            <button class="btn-color-picker" title="Pick a color">🎨</button>
             <button class="btn-delete-item">✕</button>
         </div>
         <div class="checklist-progress">
@@ -188,7 +240,7 @@ function renderChecklist(checklist) {
     `;
     
     checklistDiv.querySelector('.checklist-header').addEventListener('click', (e) => {
-        if (e.target.matches('input') || e.target.matches('button')) return;
+        if (e.target.matches('input') || e.target.matches('button') || e.target.closest('.color-palette')) return;
         
         const contentItem = state.content.find(item => item.id === checklist.id);
         contentItem.isCollapsed = !contentItem.isCollapsed;
@@ -213,6 +265,18 @@ function renderChecklist(checklist) {
     
     checklistDiv.querySelector('.btn-delete-item').addEventListener('click', () => {
         deleteContent(checklist.id);
+    });
+
+    const colorPickerBtn = checklistDiv.querySelector('.btn-color-picker');
+    colorPickerBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent header collapse
+        const existingPalette = checklistDiv.querySelector('.color-palette');
+        if (existingPalette) {
+            existingPalette.remove();
+        } else {
+            const palette = createColorPalette(checklist.id, checklist.color);
+            colorPickerBtn.after(palette);
+        }
     });
     
     // Use event delegation for checklist items for better performance
@@ -245,6 +309,16 @@ function renderChecklist(checklist) {
 }
 
 
+
+function applyColorToContent(contentId, colorName) {
+    const contentItem = state.content.find(item => item.id === contentId);
+    if (contentItem) {
+        contentItem.color = colorName;
+        scheduleSave();
+        render(); // Re-render to apply new color
+    }
+}
+
 // --- CONTENT MANIPULATION ---
 
 function addContent(type) {
@@ -252,11 +326,11 @@ function addContent(type) {
     let newItem;
     
     if (type === 'note') {
-        newItem = { id, type: 'note', title: 'New Note', content: '', isCollapsed: false };
+        newItem = { id, type: 'note', title: 'New Note', content: '', isCollapsed: false, color: null };
     } else if (type === 'checklist') {
         newItem = {
             id, type: 'checklist', title: 'My Checklist', description: '', isCollapsed: false,
-            items: [{ id: `item-${Date.now()}`, text: '', done: false }]
+            items: [{ id: `item-${Date.now()}`, text: '', done: false }], color: null
         };
     }
     
