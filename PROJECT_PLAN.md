@@ -29,10 +29,10 @@ This backlog is organized by **Epics**. Each Epic represents a major area of fun
     - [x] Allow reordering of notes/checklists via drag-and-drop
 - [x] **Add Color-Coding for Notes & Checklists**
     - [ ] **Phase 1: Per-Note/Checklist Highlight Colors**
-        - [ ] Design and implement a discrete UI element (e.g., a small icon/dropdown/pop-up with color swatches) that appears on hover or click for each note and checklist.
-        - [ ] Define a set of pre-approved, accessible highlight colors (e.g., 5-7 distinct colors) as CSS variables in `popup.css`.
-        - [ ] Implement the logic in `popup.js` to store the selected color ID for each content item (note/checklist) in the `state`.
-        - [ ] Modify the rendering functions (`renderTextNote`, `renderChecklist`) to apply the chosen color as a background or border style to the respective container `div` based on the stored `colorId`.
+        - [x] Design and implement a discrete UI element (e.g., a small icon/dropdown/pop-up with color swatches) that appears on hover or click for each note and checklist.
+        - [x] Define a set of pre-approved, accessible highlight colors (e.g., 5-7 distinct colors) as CSS variables in `popup.css`.
+        - [x] Implement the logic in `popup.js` to store the selected color ID for each content item (note/checklist) in the `state`.
+        - [x] Modify the rendering functions (`renderTextNote`, `renderChecklist`) to apply the chosen color as a background or border style to the respective container `div` based on the stored `colorId`.
     - [ ] **Phase 2: Basic Theming (Light/Dark Mode Toggle)**
         - [ ] Add a UI element (e.g., a sun/moon icon toggle) in the header section of `popup.html`.
         - [ ] Define CSS variables for both a light theme (current default) and a dark theme in `popup.css`, using a class on the `body` tag.
