@@ -7,6 +7,22 @@
     --muted-color: #6c757d;
     --border-color: #dee2e6;
     --hover-bg: #f1f3f5;
+
+    /* Highlight Colors */
+    --highlight-red: #fee2e2;
+    --highlight-blue: #e0f2fe;
+    --highlight-green: #d1fae5;
+    --highlight-yellow: #fff4c0;
+    --highlight-purple: #ede9fe;
+    --highlight-gray: #f3f4f6;
+
+    /* Highlight Text Colors (for contrast with highlights) */
+    --text-red: #991b1b;
+    --text-blue: #0369a1;
+    --text-green: #065f46;
+    --text-yellow: #92400e;
+    --text-purple: #5b21b6;
+    --text-gray: #4b5563;
 }
 
 * {
@@ -75,6 +91,53 @@ body {
 .btn-clear:hover, .btn-delete-item:hover, .btn-delete-checklist-item:hover {
     color: #d9480f;
 }
+
+.btn-color-picker {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--muted-color);
+    padding: 4px;
+    margin-left: auto; /* Push to the right */
+}
+
+.btn-color-picker:hover {
+    color: var(--primary-color);
+}
+
+.color-palette {
+    position: absolute;
+    background-color: var(--container-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 6px;
+    display: flex;
+    gap: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    top: 35px;
+    left: 140px; 
+}
+
+.color-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.color-swatch:hover {
+    border-color: var(--primary-color);
+}
+
+.color-swatch.selected {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.5); /* Primary color with transparency */
+}
+
 
 .btn-add {
     background-color: var(--primary-color);
@@ -339,4 +402,53 @@ body {
 .note-header, .checklist-header {
     position: relative;
     padding-left: 24px;
+}
+
+/* --- Individual Note/Checklist Colors --- */
+.note-container.color-red, .checklist-container.color-red {
+    background-color: var(--highlight-red);
+    color: var(--text-red);
+}
+.note-container.color-red .note-title, .checklist-container.color-red .checklist-title, .note-container.color-red .note-textarea, .checklist-container.color-red .checklist-description, .checklist-container.color-red .checklist-item-text {
+    color: var(--text-red);
+}
+
+.note-container.color-blue, .checklist-container.color-blue {
+    background-color: var(--highlight-blue);
+    color: var(--text-blue);
+}
+.note-container.color-blue .note-title, .checklist-container.color-blue .checklist-title, .note-container.color-blue .note-textarea, .checklist-container.color-blue .checklist-description, .checklist-container.color-blue .checklist-item-text {
+    color: var(--text-blue);
+}
+
+.note-container.color-green, .checklist-container.color-green {
+    background-color: var(--highlight-green);
+    color: var(--text-green);
+}
+.note-container.color-green .note-title, .checklist-container.color-green .checklist-title, .note-container.color-green .note-textarea, .checklist-container.color-green .checklist-description, .checklist-container.color-green .checklist-item-text {
+    color: var(--text-green);
+}
+
+.note-container.color-yellow, .checklist-container.color-yellow {
+    background-color: var(--highlight-yellow);
+    color: var(--text-yellow);
+}
+.note-container.color-yellow .note-title, .checklist-container.color-yellow .checklist-title, .note-container.color-yellow .note-textarea, .checklist-container.color-yellow .checklist-description, .checklist-container.color-yellow .checklist-item-text {
+    color: var(--text-yellow);
+}
+
+.note-container.color-purple, .checklist-container.color-purple {
+    background-color: var(--highlight-purple);
+    color: var(--text-purple);
+}
+.note-container.color-purple .note-title, .checklist-container.color-purple .checklist-title, .note-container.color-purple .note-textarea, .checklist-container.color-purple .checklist-description, .checklist-container.color-purple .checklist-item-text {
+    color: var(--text-purple);
+}
+
+.note-container.color-gray, .checklist-container.color-gray {
+    background-color: var(--highlight-gray);
+    color: var(--text-gray);
+}
+.note-container.color-gray .note-title, .checklist-container.color-gray .checklist-title, .note-container.color-gray .note-textarea, .checklist-container.color-gray .checklist-description, .checklist-container.color-gray .checklist-item-text {
+    color: var(--text-gray);
 }
