@@ -34,6 +34,7 @@ function createColorPalette(contentId, currentSelectedColor) {
             // Hide the palette after selection
             paletteDiv.remove();
         });
+
         paletteDiv.appendChild(colorSwatch);
     });
 
@@ -41,11 +42,51 @@ function createColorPalette(contentId, currentSelectedColor) {
 }
 
 // --- DOM ELEMENTS ---
-let contentArea, addNoteBtn, addChecklistBtn, statusElement, clearBtn;
+
+// --- THEME MANAGEMENT ---
+
+async function loadTheme() {
+    try {
+        const result = await chrome.storage.local.get('theme');
+        currentTheme = result.theme || 'light';
+        applyTheme(currentTheme);
+    } catch (error) {
+        console.error('Error loading theme:', error);
+    }
+}
+
+async function saveTheme() {
+    try {
+        await chrome.storage.local.set({ theme: currentTheme });
+    } catch (error) {
+        console.error('Error saving theme:', error);
+    }
+}
+
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeToggleBtn.textContent = '🌙';
+        themeToggleBtn.title = 'Switch to light mode';
+    } else {
+        document.body.classList.remove('dark-mode');
+        themeToggleBtn.textContent = '☀️';
+        themeToggleBtn.title = 'Switch to dark mode';
+    }
+}
+
+function toggleTheme() {
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    applyTheme(currentTheme);
+    saveTheme();
+}
+
+let contentArea, addNoteBtn, addChecklistBtn, statusElement, clearBtn, themeToggleBtn;
 
 // --- STATE ---
 let state = {};
 let saveTimeout;
+let currentTheme = 'light'; // Default theme
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', main);
@@ -57,17 +98,22 @@ function main() {
     addChecklistBtn = document.getElementById('addChecklistBtn');
     statusElement = document.querySelector('.status');
     clearBtn = document.getElementById('clearBtn');
+    themeToggleBtn = document.getElementById('themeToggleBtn');
 
     // Attach event listeners
     addNoteBtn.addEventListener('click', () => addContent('note'));
     addChecklistBtn.addEventListener('click', () => addContent('checklist'));
     clearBtn.addEventListener('click', clearAllData);
+    themeToggleBtn.addEventListener('click', toggleTheme);
     
     // Initialize drag and drop
     initializeDragAndDrop(); // ← Add this line
     
     // Load initial data
     loadData();
+
+    // Load and apply theme
+    loadTheme();
 }
 
 // --- DATA MANAGEMENT ---
