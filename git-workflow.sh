@@ -180,6 +180,7 @@ create_pr() {
     local current_branch=$(get_current_branch)
     local pr_title=${1:-"Feature: ${current_branch#$FEATURE_PREFIX}"}
     local pr_body=${2:-"This PR implements the ${current_branch#$FEATURE_PREFIX} feature."}
+    local open_browser=${3:-"false"}
     
     print_header "Creating Pull Request"
     
@@ -196,8 +197,12 @@ create_pr() {
     
     print_success "Pull request created successfully!"
     
-    # Show PR details
-    gh pr view --web
+    # Conditionally open browser
+    if [[ "$open_browser" == "true" ]]; then
+        gh pr view --web
+    else
+        gh pr view "$current_branch"
+    fi
 }
 
 # Complete feature (merge PR and cleanup)
